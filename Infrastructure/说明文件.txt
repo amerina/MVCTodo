@@ -1,0 +1,11 @@
+﻿基础结构项目通常包括数据访问实现。 
+在典型的 ASP.NET Core Web 应用程序中，这些实现包括 Entity Framework (EF) DbContext、任何已定义的 EF Core Migration 对象以及数据访问实现类。 
+提取数据访问实现代码最常用的方式是通过使用存储库设计模式。
+除数据访问实现外，基础结构项目还应包含必须与基础结构问题交互的服务的实现。 
+这些服务应实现应用程序内核中定义的接口，因此基础结构应包含对应用程序内核项目的引用。
+
+
+基础结构类型
+	• EF Core 类型（DbContext、Migration）
+	• 数据访问实现类型（存储库）
+特定于基础结构的服务（如 FileLogger 或 SmtpNotifier）
