@@ -12,7 +12,7 @@ namespace TaskTodo.ApplicationCore.Entities
     /// </summary>
     public class TodoItem : BaseEntity, IAggregateRoot
     {
-        private TodoItem()
+        public TodoItem()
         {
             // required by EF
         }

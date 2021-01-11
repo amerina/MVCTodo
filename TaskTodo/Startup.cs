@@ -2,12 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using TaskTodo.ApplicationCore.Interfaces;
+using TaskTodo.ApplicationCore.Services;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Infrastructure.Identity;
 
 namespace TaskTodo
 {
@@ -39,6 +45,20 @@ namespace TaskTodo
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            //数据库服务注册
+            services.AddDbContext<ApplicationDbContext>(c =>c.UseInMemoryDatabase("TodoItem"));
+
+            //Indentity
+            //services.AddIdentity<ApplicationUser, IdentityRole>()
+            //   .AddEntityFrameworkStores<ApplicationDbContext>()
+            //   .AddDefaultTokenProviders();
+
+            //仓储服务注册
+            services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
+
+            //应用服务注册
+            services.AddScoped<ITodoItemService, TodoItemService>();
+          
             //1添加AddMvc与AddControllersWithViews中间件
             //services.AddMvc 这行添加了一些服务，它们是 ASP.NET Core 系统内部依赖的
             services.AddMvc();
@@ -56,6 +76,10 @@ namespace TaskTodo
 
             //
             app.UseRouting();
+
+            //添加认证
+            //app.UseAuthentication();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

@@ -12,6 +12,6 @@ namespace TaskTodo.ApplicationCore.Interfaces
 
         Task<bool> AddItemAsync(string userId, TaskDetail task, bool isDone);
 
-        Task MarkDoneAsync(int id);
+        Task MarkDoneAsync(int id, string userId);
     }
 }

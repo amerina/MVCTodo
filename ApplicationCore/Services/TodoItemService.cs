@@ -36,7 +36,7 @@ namespace TaskTodo.ApplicationCore.Services
             return await _todoItemRepository.ListAsync(itemsSpec);
         }
 
-        public async Task MarkDoneAsync(int id)
+        public async Task MarkDoneAsync(int id, string userId)
         {
             var itemsSpec = new ItemSpecification(id);
             var item = await _todoItemRepository.FirstOrDefaultAsync(itemsSpec);
