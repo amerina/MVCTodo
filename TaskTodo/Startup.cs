@@ -52,9 +52,9 @@ namespace TaskTodo
             options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             //Indentity
-            //services.AddIdentity<ApplicationUser, IdentityRole>()
-            //   .AddEntityFrameworkStores<ApplicationDbContext>()
-            //   .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, IdentityRole>()
+               .AddEntityFrameworkStores<ApplicationDbContext>()
+               .AddDefaultTokenProviders();
 
             //仓储服务注册
             services.AddScoped(typeof(IAsyncRepository<>), typeof(EfRepository<>));
@@ -92,8 +92,10 @@ namespace TaskTodo
             app.UseStaticFiles();
 
             //添加认证
-            //app.UseAuthentication();
-            //app.UseAuthorization();
+            app.UseAuthentication();
+
+            //添加授权
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

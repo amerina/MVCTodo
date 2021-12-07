@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskTodo.ApplicationCore.Entities;
@@ -12,22 +13,12 @@ using TaskTodo.ViewModels;
 namespace TaskTodo.Controllers
 {
     [Route("[controller]/[action]")]
+    [Authorize]
     public class TodoController : Controller
     {
         private readonly ITodoItemService _todoItemService;
-        //private readonly UserManager<ApplicationUser> _userManager;
-        //public TodoController(ITodoItemService todoItemService, UserManager<ApplicationUser> userManager)
-        //{
-        //    ///接口如此有用的原因就在于，因为它们有助于解耦（分离）你程序里的逻辑。
-        //    ///既然这个控制器依赖于 ITodoItemService 接口，而不是任何 特定的 类，它就不知道也不必关心实际使用的是哪个具体的类
-        //    ///它可以是任意一个实现了此接口的类。
-        //    ///只要它符合该接口的要求，控制器就能工作。这使你可以轻而易举地，独立测试程序的各部分
-        //    _todoItemService = todoItemService;
-
-        //    _userManager = userManager;
-        //}
-
-        public TodoController(ITodoItemService todoItemService)
+        private readonly UserManager<ApplicationUser> _userManager;
+        public TodoController(ITodoItemService todoItemService, UserManager<ApplicationUser> userManager)
         {
             ///接口如此有用的原因就在于，因为它们有助于解耦（分离）你程序里的逻辑。
             ///既然这个控制器依赖于 ITodoItemService 接口，而不是任何 特定的 类，它就不知道也不必关心实际使用的是哪个具体的类
@@ -35,17 +26,29 @@ namespace TaskTodo.Controllers
             ///只要它符合该接口的要求，控制器就能工作。这使你可以轻而易举地，独立测试程序的各部分
             _todoItemService = todoItemService;
 
+            _userManager = userManager;
         }
+
+        //public TodoController(ITodoItemService todoItemService)
+        //{
+        //    ///接口如此有用的原因就在于，因为它们有助于解耦（分离）你程序里的逻辑。
+        //    ///既然这个控制器依赖于 ITodoItemService 接口，而不是任何 特定的 类，它就不知道也不必关心实际使用的是哪个具体的类
+        //    ///它可以是任意一个实现了此接口的类。
+        //    ///只要它符合该接口的要求，控制器就能工作。这使你可以轻而易举地，独立测试程序的各部分
+        //    _todoItemService = todoItemService;
+
+        //}
 
         public async Task<IActionResult> IndexAsync()
         {
-            //var currentUser = await _userManager.GetUserAsync(User);
-            //if (currentUser == null) return Challenge();
+            //如果当前用户已经登录， User 属性就持有一个轻量级的对象，包括了用户的一些（并非全部）信息。
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
 
             // 从数据库获取 to-do 条目
             ///await 把代码暂停在 异步(async) 操作上，而后，在底层数据库或者网络请求结束时，从暂停的地方恢复执行。
             ///就是说，你的程序并没有卡住或者阻塞住，因为它可以处理其它的请求。
-            var items = await _todoItemService.GetIncompleteItemsAsync("0");
+            var items = await _todoItemService.GetIncompleteItemsAsync(currentUser.Id);
             // 把条目置于 model 中
             var model = new TodoViewModel()
             {
@@ -80,10 +83,11 @@ namespace TaskTodo.Controllers
                 return RedirectToAction("Index");
             }
 
-            //var currentUser = await _userManager.GetUserAsync(User);
-            //if (currentUser == null) return Challenge();
+            //如果当前用户已经登录， User 属性就持有一个轻量级的对象，包括了用户的一些（并非全部）信息。
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
 
-            var successful = await _todoItemService.AddItemAsync("0", new TaskDetail(newItem.Title,""), false);
+            var successful = await _todoItemService.AddItemAsync(currentUser.Id, new TaskDetail(newItem.Title,""), false);
             if (!successful)
             {
                 return BadRequest("Could not add item.");
@@ -94,10 +98,10 @@ namespace TaskTodo.Controllers
 
         public async Task<IActionResult> MarkDone(int id)
         {
-            //var currentUser = await _userManager.GetUserAsync(User);
-            //if (currentUser == null) return Challenge();
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null) return Challenge();
 
-            await _todoItemService.MarkDoneAsync(id, "0");
+            await _todoItemService.MarkDoneAsync(id, currentUser.Id);
 
             return RedirectToAction("Index");
         }
