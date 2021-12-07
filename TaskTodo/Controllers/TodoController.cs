@@ -34,7 +34,7 @@ namespace TaskTodo.Controllers
             ///它可以是任意一个实现了此接口的类。
             ///只要它符合该接口的要求，控制器就能工作。这使你可以轻而易举地，独立测试程序的各部分
             _todoItemService = todoItemService;
-            
+
         }
 
         public async Task<IActionResult> IndexAsync()
@@ -71,7 +71,8 @@ namespace TaskTodo.Controllers
         /// </summary>
         /// <param name="newItem"></param>
         /// <returns></returns>
-        public async Task<IActionResult> AddItem(TodoItem newItem)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddItem(NewTodoItem newItem)
         {
             ///Title 字段上的 [Required] 属性告知 ASP.NET Core 的模型核验器，如果标题缺失或为空，则判定其无效
             if (!ModelState.IsValid)
@@ -82,7 +83,7 @@ namespace TaskTodo.Controllers
             //var currentUser = await _userManager.GetUserAsync(User);
             //if (currentUser == null) return Challenge();
 
-            var successful = await _todoItemService.AddItemAsync("0", newItem.Task, newItem.IsDone);
+            var successful = await _todoItemService.AddItemAsync("0", new TaskDetail(newItem.Title,""), false);
             if (!successful)
             {
                 return BadRequest("Could not add item.");
@@ -97,7 +98,7 @@ namespace TaskTodo.Controllers
             //if (currentUser == null) return Challenge();
 
             await _todoItemService.MarkDoneAsync(id, "0");
-           
+
             return RedirectToAction("Index");
         }
     }

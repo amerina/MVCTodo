@@ -30,7 +30,7 @@ namespace TaskTodo
             Configuration = configuration;
         }
 
-       
+
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -45,8 +45,11 @@ namespace TaskTodo
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            //数据库服务注册
-            services.AddDbContext<ApplicationDbContext>(c =>c.UseInMemoryDatabase("TodoItem"));
+            //数据库服务注册,使用内存数据库
+            //services.AddDbContext<ApplicationDbContext>(c =>c.UseInMemoryDatabase("TodoItem"));
+
+            services.AddDbContext<ApplicationDbContext>(options =>
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             //Indentity
             //services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -58,9 +61,10 @@ namespace TaskTodo
 
             //应用服务注册
             services.AddScoped<ITodoItemService, TodoItemService>();
-          
+
             //1添加AddMvc与AddControllersWithViews中间件
             //services.AddMvc 这行添加了一些服务，它们是 ASP.NET Core 系统内部依赖的
+            //你在应用里所需的任何其它服务，也都要在这个地方添加到服务容器里。
             services.AddMvc();
 
             services.AddControllersWithViews();
@@ -83,6 +87,9 @@ namespace TaskTodo
 
             //
             app.UseRouting();
+
+            //引用静态文件
+            app.UseStaticFiles();
 
             //添加认证
             //app.UseAuthentication();
